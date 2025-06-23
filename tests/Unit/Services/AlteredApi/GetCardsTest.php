@@ -13,21 +13,20 @@ use GuzzleHttp\Psr7\Response;
 
 describe('GetCards', function () {
     beforeEach(function () {
-        $this->mockHandler = new MockHandler();
-        $this->handlerStack = HandlerStack::create($this->mockHandler);
-        $this->client = new Client(['handler' => $this->handlerStack]);
-        $this->service = new GetCards($this->client);
-
         $this->faction = Faction::factory()->create(['altered_api_id' => 1]);
         $this->rarity = Rarity::factory()->create(['altered_api_id' => 1]);
         $this->cardType = CardType::factory()->create(['altered_api_id' => 1]);
         $this->cardSet = CardSet::factory()->create(['altered_api_id' => 1]);
+
+        $this->mockHandler = new MockHandler();
+        $this->handlerStack = HandlerStack::create($this->mockHandler);
+        $this->client = new Client(['handler' => $this->handlerStack]);
+        $this->service = new GetCards($this->cardSet->slug, $this->client);
     });
 
     it('returns correct endpoint', function () {
         $reflection = new ReflectionClass($this->service);
         $method = $reflection->getMethod('getEndpoint');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->service))->toBe('cards');
     });
@@ -35,7 +34,6 @@ describe('GetCards', function () {
     it('returns correct model class', function () {
         $reflection = new ReflectionClass($this->service);
         $method = $reflection->getMethod('getModelClass');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->service))->toBe(Card::class);
     });
@@ -54,7 +52,6 @@ describe('GetCards', function () {
 
         $reflection = new ReflectionClass($this->service);
         $method = $reflection->getMethod('transformApiData');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->service, $apiData);
 
@@ -76,7 +73,6 @@ describe('GetCards', function () {
 
         $reflection = new ReflectionClass($this->service);
         $method = $reflection->getMethod('shouldProcessItem');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->service, $foilerCard))->toBeFalse()
             ->and($method->invoke($this->service, $normalCard))->toBeTrue();

@@ -40,7 +40,7 @@ describe('Altered API Integration', function () {
 
         $mockHandler->append(new Response(200, [], json_encode($cardsResponse)));
 
-        $getCards = new GetCards($client);
+        $getCards = new GetCards($cardSet->slug, $client);
         $getCards->getData();
 
         expect(Card::count())->toBe(1);

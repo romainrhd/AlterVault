@@ -7,9 +7,17 @@ use App\Models\CardSet;
 use App\Models\CardType;
 use App\Models\Faction;
 use App\Models\Rarity;
+use GuzzleHttp\Client;
 
 class GetCards extends BaseAlteredApiService
 {
+    public function __construct(
+        private readonly string $cardSetSlug,
+        Client $client = null
+    ){
+        parent::__construct($client);
+    }
+
     protected function getEndpoint(): string
     {
         return 'cards';
@@ -45,7 +53,7 @@ class GetCards extends BaseAlteredApiService
         $hasNextPage = true;
 
         while ($hasNextPage) {
-            $responseBody = $this->makeApiRequest($this->getEndpoint(), ['page' => $page]);
+            $responseBody = $this->makeApiRequest($this->getEndpoint(), ['page' => $page, 'cardSet' => $this->cardSetSlug]);
             $this->processApiData($responseBody);
 
             $hasNextPage = isset($responseBody['hydra:view']['hydra:next']);

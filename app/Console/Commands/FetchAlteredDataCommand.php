@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\CardSet;
 use App\Models\User;
 use App\Services\AlteredApi\GetAuthToken;
 use App\Services\AlteredApi\GetCards;
@@ -32,6 +33,7 @@ class FetchAlteredDataCommand extends Command
 
     /**
      * Execute the console command.
+     * @throws ConnectionException
      */
     public function handle(): void
     {
@@ -55,17 +57,23 @@ class FetchAlteredDataCommand extends Command
         $this->info('Starting fetching Factions data...');
         (new GetFactions())->getData();
         $this->info('Finished fetching Factions data...');
+
         $this->info('Starting fetching Sets of Cards data...');
         (new GetCardSets())->getData();
         $this->info('Finished fetching Sets of Cards data...');
+
         $this->info('Starting fetching Types of Cards data...');
         (new GetCardTypes())->getData($altered_email, $altered_password);
         $this->info('Finished fetching Types of Cards data...');
+
         $this->info('Starting fetching Rarities data...');
         (new GetRarities())->getData();
         $this->info('Finished fetching Rarities data...');
+
         $this->info('Starting fetching Cards data...');
-        (new GetCards())->getData();
+        CardSet::all()->each(function (CardSet $cardSet): void {
+            (new GetCards($cardSet->slug))->getData();
+        });
         $this->info('Finished fetching Cards data...');
 
         $this->info('Synchronisation de la collection utilisateur...');
